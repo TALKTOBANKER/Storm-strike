@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">STORMSTRIKE</string>
+    <string name="admob_app_id">ca-app-pub-3785297962335569~7993443539</string>
+    <string name="admob_banner_id">ca-app-pub-3785297962335569/4331821111</string>
+    <string name="admob_interstitial_id">ca-app-pub-3785297962335569/2488256404</string>
+</resources>

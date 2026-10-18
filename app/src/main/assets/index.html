@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>STORMSTRIKE — XE SĂN BÃO</title>
+<style>
+:root{--c:#00e5ff;--r:#ff4438;--g:#ffd84a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111c;color:#f3fbff;font-family:system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;touch-action:none}
+canvas{position:fixed;inset:0;display:block;width:100%;height:100%;z-index:0}
+button{font:inherit;cursor:pointer;border:1px solid var(--c);background:#10283a;color:white;padding:9px 14px;font-weight:800;border-radius:8px;outline:none;transition:transform .1s,background .15s}
+button:active{transform:scale(0.96)}
+button.p{background:linear-gradient(135deg,var(--r),#d62828);border-color:var(--r);color:#fff}
+button:disabled{opacity:.35;pointer-events:none}
+#hud{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
+.pa{background:linear-gradient(135deg,#05101ce8,#092333bd);border:1px solid #00e5ff44;border-radius:10px;padding:7px 10px;backdrop-filter:blur(6px)}
+#top{position:absolute;top:max(6px,env(safe-area-inset-top));left:8px;right:8px;display:flex;justify-content:space-between;gap:8px}
+.hb{width:min(200px,30vw);height:8px;background:#233744;border-radius:8px;overflow:hidden;border:1px solid #2d4a5c;margin:4px 0}
+.hf{height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--g),var(--r))}
+#ret{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%)}
+#ret:before,#ret:after{content:"";position:absolute;background:var(--c);box-shadow:0 0 8px var(--c)}
+#ret:before{width:24px;height:2px;top:11px}
+#ret:after{width:2px;height:24px;left:11px}
+#toast{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);background:#000c;border:1.5px solid var(--c);padding:9px 16px;border-radius:8px;display:none;font-weight:900;text-align:center;max-width:90vw;z-index:25;box-shadow:0 0 20px #00e5ff55}
+#comp{position:absolute;top:max(6px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);background:#0009;border:1px solid #234;padding:4px 12px;border-radius:20px;font-size:11px;white-space:nowrap}
+#arr{position:absolute;left:50%;top:66%;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:18px solid var(--g);filter:drop-shadow(0 0 8px var(--g));display:none}
+
+/* Modal Overlay */
+#ov{
+  position:fixed;
+  inset:0;
+  z-index:40;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  background:radial-gradient(ellipse at center,rgba(10,28,46,0.92),rgba(2,8,15,0.97));
+  padding:10px 14px 62px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+@keyframes overlayFadeIn{
+  from{opacity:0;transform:scale(0.97) translateY(8px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+.sc{
+  width:min(720px,96vw);
+  margin:auto 0;
+  background:#05101cf4;
+  border:1.5px solid #00e5ff88;
+  border-radius:14px;
+  padding:14px 18px;
+  box-shadow:0 0 36px rgba(0,229,255,0.18);
+  animation:overlayFadeIn 0.28s cubic-bezier(0.16,1,0.3,1) forwards;
+}
+.logo{font-size:clamp(28px,6vw,52px);font-weight:1000;font-style:italic;margin:4px 0;text-shadow:0 0 20px #00e5ff88;line-height:1}
+.muted{color:#a9bfca;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:10px 0}
+.it{border:1px solid #29495b;background:#0a1a29;padding:10px;border-radius:9px}
+.mapSel{border:2px solid #29495b;cursor:pointer}
+.mapSel.on{border-color:var(--c);background:#0c2a3a;box-shadow:0 0 16px #00e5ff44}
+.mapSel .prev{height:58px;border-radius:7px;margin-bottom:6px;border:1px solid #ffffff22}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+
+/* Mobile Controls */
+#mob{position:fixed;inset:auto 0 max(8px,env(safe-area-inset-bottom)) 0;display:flex;justify-content:space-between;align-items:flex-end;gap:8px;padding:0 12px;pointer-events:none;z-index:30}
+#mob .joy{width:86px;height:86px;flex:0 0 86px;border-radius:50%;border:2px solid #8ab5c8cc;background:#071522bb;position:relative;pointer-events:auto;touch-action:none;box-shadow:0 2px 14px #0008}
+#mob .knob{position:absolute;width:34%;height:34%;border-radius:50%;background:#00e5ff88;border:2px solid var(--c);left:33%;top:33%;pointer-events:none}
+#mob .actionGroup{display:flex;gap:6px;align-items:flex-end;pointer-events:auto}
+#mob .mb{width:50px;height:50px;flex:0 0 50px;border-radius:50%;font-size:10px;line-height:1.05;padding:2px;background:#0c2c3ef5;pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0008}
+#mob .mb.r{background:#7c211eee;border-color:var(--r)}
+#mob .mb.go{background:#66561e;border-color:var(--g);color:var(--g)}
+
+@media (orientation:landscape) and (max-height:500px){
+  #top{top:4px;left:6px;right:6px}
+  #top .pa{padding:4px 7px;font-size:10px}
+  #comp{top:4px;font-size:9px}
+  #mission{top:48px!important;max-width:180px!important;padding:5px 7px!important}
+  #ret{display:none}
+  #mob .joy{width:76px;height:76px;flex-basis:76px}
+  #mob .mb{width:46px;height:46px;flex-basis:46px;font-size:9px}
+}
+</style>
+<script src="three.min.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <div id="top">
+    <div class="pa">
+      <div style="font-size:10px;color:#a9c9d8;font-weight:800">
+        VEHICLE <span id="as" style="color:var(--g);pointer-events:all;cursor:pointer">🔊 ON</span>
+        <span id="mapName" style="color:var(--c)">— VEN BIỂN</span>
+        <button id="btnPause" style="pointer-events:all;margin-left:6px;padding:2px 7px;font-size:10px;border-radius:4px;border:1px solid #456;background:#0d2232">PAUSE</button>
+      </div>
+      <div><b id="sp">0</b> KM/H &nbsp;<b id="al">70</b>M</div>
+      <div class="hb"><div id="hf" class="hf"></div></div>
+      <div style="font-size:11px">HEAT <b id="ht">0%</b> <span id="oh" style="color:#ff655a;display:none">OVERHEAT!</span></div>
+    </div>
+    <div class="pa" style="text-align:right">
+      <div style="font-size:10px;color:#a9c9d8;font-weight:800">CREDITS</div>
+      <div style="color:var(--g);font-weight:900;font-size:17px">$<span id="mn">0</span></div>
+      <div style="font-size:11px">SCORE <b id="sc2">0</b> KILL <b id="kl">0</b></div>
+      <div id="sh" style="display:none;background:var(--c);color:#00202b;padding:2px 7px;border-radius:4px;margin-top:4px;font-weight:900;font-size:11px">[E] HÚT!</div>
+    </div>
+  </div>
+  <div id="comp">STORM RADAR</div>
+  <div id="mission" class="pa" style="position:absolute;top:100px;left:10px;max-width:270px">
+    <div style="font-size:10px;color:#a9c9d8;font-weight:800">CONTRACT</div>
+    <div id="mt" style="font-weight:900">—</div>
+    <div id="mp" style="font-size:11px"></div>
+    <div id="mi" style="font-size:11px;color:#bfe8f4;margin-top:4px;line-height:1.35">Hướng dẫn nhiệm vụ.</div>
+  </div>
+  <div id="ret"></div>
+  <div id="arr"></div>
+  <div id="toast"></div>
+  <div id="mob">
+    <div class="joy" id="joy"><div class="knob" id="knob"></div></div>
+    <div class="actionGroup">
+      <button class="mb" id="bUp">UP ▲</button>
+      <button class="mb go" id="bSi">SIPHON<br>⚡</button>
+      <button class="mb r" id="bFi">FIRE<br>💥</button>
+      <button class="mb r" id="bBo">BOOST</button>
+    </div>
+  </div>
+</div>
+
+<div id="ov"><div class="sc" id="screen"></div></div>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const THREE = window.THREE;
+  const $ = id => document.getElementById(id);
+  const canvas = $('c');
+
+  const setScreen = html => {
+    const el = $('screen');
+    if (el) {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = 'overlayFadeIn 0.28s cubic-bezier(0.16,1,0.3,1) forwards';
+      el.innerHTML = html;
+    }
+  };
+
+  if (!THREE) {
+    setScreen('<h2>Lỗi Thư Viện 3D</h2><p class="muted">Không tải được Three.js engine. Hãy khởi động lại game.</p>');
+    return;
+  }
+
+  let renderer, scene, camera;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  } catch (e) {
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+    } catch (e2) {
+      setScreen('<h2>Thiết Bị Không Hỗ Trợ WebGL</h2><p class="muted">Vui lòng kiểm tra quyền tăng tốc đồ họa WebView của máy.</p>');
+      return;
+    }
+  }
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  if (renderer.outputColorSpace !== undefined) {
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+  }
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x08101c);
+  scene.fog = new THREE.FogExp2(0x0b1e33, .00125);
+
+  camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 1, 4000);
+
+  const MAPS = [
+    { id: 'coastal', n: 'Ven Biển (Coastal)', d: 'Vùng duyên hải nhiều giông tố nhiệt đới', bg: 0x071524, gr: 0x0f2e3d, fog: 0x091c2b, hl: 0x00e5ff },
+    { id: 'foundry', n: 'Xưởng Thép (Foundry)', d: 'Khu công nghiệp hoang phế với lốc bụi lửa', bg: 0x1a0f0d, gr: 0x2d1712, fog: 0x1f110c, hl: 0xff5533 },
+    { id: 'megacity', n: 'Đô Thị Bão (Megacity)', d: 'Hẻm nhà cao tầng gió xoáy cực mạnh', bg: 0x0b0e1a, gr: 0x141829, fog: 0x0d1021, hl: 0x9955ff },
+    { id: 'eye', n: 'Mắt Siêu Bão (Eye)', d: 'Tâm bão cấp 5 với sấm chớp liên hoàn', bg: 0x030810, gr: 0x061120, fog: 0x050e1c, hl: 0x00ffcc }
+  ];
+  let curMapId = 'coastal';
+
+  const ambLight = new THREE.AmbientLight(0x7fb3d5, 1.2);
+  scene.add(ambLight);
+  const dirLight = new THREE.DirectionalLight(0xffeedd, 1.6);
+  dirLight.position.set(200, 600, 300);
+  scene.add(dirLight);
+
+  // Ground
+  const gGeo = new THREE.PlaneGeometry(3000, 3000, 40, 40);
+  const pos = gGeo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const vx = pos.getX(i), vy = pos.getY(i);
+    pos.setZ(i, (Math.sin(vx * .005) * Math.cos(vy * .005)) * 35);
+  }
+  gGeo.computeVertexNormals();
+  const gMat = new THREE.MeshStandardMaterial({ color: 0x0f2e3d, roughness: .9, metalness: .1 });
+  const ground = new THREE.Mesh(gGeo, gMat);
+  ground.rotation.x = -Math.PI / 2;
+  scene.add(ground);
+
+  // City Buildings
+  const cityGroup = new THREE.Group();
+  const bMat = new THREE.MeshStandardMaterial({ color: 0x1b2838, roughness: .6 });
+  for (let i = 0; i < 50; i++) {
+    const w = 20 + Math.random() * 30, h = 40 + Math.random() * 120, d = 20 + Math.random() * 30;
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bMat);
+    const ang = Math.random() * Math.PI * 2, rad = 250 + Math.random() * 800;
+    b.position.set(Math.cos(ang) * rad, h / 2, Math.sin(ang) * rad);
+    cityGroup.add(b);
+  }
+  scene.add(cityGroup);
+
+  // Tornadoes
+  class Tornado {
+    constructor(x, z, scale = 1) {
+      this.group = new THREE.Group();
+      this.rings = [];
+      this.scale = scale;
+      this.speed = 20 + Math.random() * 15;
+      this.dir = new THREE.Vector2(Math.random() - .5, Math.random() - .5).normalize();
+      for (let i = 0; i < 8; i++) {
+        const r = (i + 1) * 6 * scale;
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(r * .8, r, 16),
+          new THREE.MeshBasicMaterial({ color: 0x88ccff, side: THREE.DoubleSide, transparent: true, opacity: .35 })
+        );
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = i * 14 * scale + 5;
+        this.rings.push(ring);
+        this.group.add(ring);
+      }
+      this.position = this.group.position;
+      this.position.set(x, 0, z);
+      scene.add(this.group);
+    }
+    update(dt) {
+      this.position.x += this.dir.x * this.speed * dt;
+      this.position.z += this.dir.y * this.speed * dt;
+      if (this.position.length() > 1200) this.dir.negate();
+      this.rings.forEach((r, idx) => {
+        r.rotation.z += dt * (3 + idx * .5);
+      });
+    }
+  }
+  let tors = [];
+
+  // Player Ship
+  const player = new THREE.Group();
+  const bodyGeo = new THREE.ConeGeometry(5, 18, 6);
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xff6622, metalness: .7, roughness: .3 });
+  const body = new THREE.Mesh(bodyGeo, bodyMat);
+  body.rotation.x = Math.PI / 2;
+  player.add(body);
+
+  const wingGeo = new THREE.BoxGeometry(22, 1, 5);
+  const wingMat = new THREE.MeshStandardMaterial({ color: 0x223344, metalness: .8 });
+  const wings = new THREE.Mesh(wingGeo, wingMat);
+  wings.position.set(0, 0, -2);
+  player.add(wings);
+  scene.add(player);
+
+  let vel = new THREE.Vector3();
+  let playing = false, isPaused = false, campaignLevel = 1;
+  let money = 500, score = 0, kills = 0, heat = 0, over = false, boost = false, done = false;
+  let mission = { title: 'SĂN LỐC BẬC 1', kind: 'siphon', target: 100, reward: 250, instructions: 'Hút năng lượng từ lốc xoáy gần nhất' };
+  let progress = 0;
+
+  let save = { level: 1, credits: 500, best: 0, totalKills: 0, upgrades: { speed: 1, heat: 1, siphon: 1 }, completed: [] };
+  try {
+    const l = localStorage.getItem('SS_DATA');
+    if (l) save = Object.assign(save, JSON.parse(l));
+  } catch (e) {}
+  money = save.credits;
+
+  function persist() {
+    try { localStorage.setItem('SS_DATA', JSON.stringify(save)); } catch (e) {}
+  }
+
+  function notify(txt) {
+    const t = $('toast');
+    if (!t) return;
+    t.textContent = txt;
+    t.style.display = 'block';
+    setTimeout(() => { if (t) t.style.display = 'none'; }, 2400);
+  }
+
+  function buildEnv(id) {
+    const m = MAPS.find(x => x.id === id) || MAPS[0];
+    scene.background.setHex(m.bg);
+    gMat.color.setHex(m.gr);
+    scene.fog.color.setHex(m.fog);
+    const mn = $('mapName');
+    if (mn) mn.textContent = '— ' + m.n.toUpperCase();
+  }
+
+  function startGame() {
+    playing = true;
+    isPaused = false;
+    done = false;
+    progress = 0;
+    heat = 0;
+    over = false;
+    vel.set(0, 0, 0);
+    player.position.set(0, 50, 0);
+    player.rotation.set(0, 0, 0);
+    tors.forEach(t => scene.remove(t.group));
+    tors = [new Tornado(150, -200, 1.5), new Tornado(-250, 300, 1.2), new Tornado(400, 100, 1.8)];
+    $('hud').style.display = 'block';
+    $('ov').style.display = 'none';
+    if (window.AndroidBridge && window.AndroidBridge.onGameStateChanged) {
+      window.AndroidBridge.onGameStateChanged(true);
+    }
+  }
+
+  function showLevelResult(success, reason = '') {
+    playing = false;
+    $('hud').style.display = 'none';
+    $('ov').style.display = 'flex';
+    if (window.AndroidBridge && window.AndroidBridge.onGameStateChanged) {
+      window.AndroidBridge.onGameStateChanged(false);
+    }
+
+    if (success) {
+      const cleared = campaignLevel;
+      save.credits += 250;
+      save.level = Math.min(30, cleared + 1);
+      persist();
+      setScreen(`<div style="color:var(--c);font-weight:900;letter-spacing:3px">LEVEL COMPLETE</div>
+      <div class="logo">✓ <span style="color:var(--c)">HOÀN THÀNH NHIỆM VỤ</span></div>
+      <h2>LEVEL ${cleared}/30 THẮNG LỢI</h2>
+      <div class="grid">
+        <div class="it"><h3>THƯỞNG</h3><b style="color:var(--g)">+$250</b></div>
+        <div class="it"><h3>ĐIỂM</h3><b>${score}</b></div>
+        <div class="it"><h3>TIẾN ĐỘ</h3><b>${save.level}/30</b></div>
+      </div>
+      <div class="actions">
+        <button class="p" id="nextLevel">LEVEL TIẾP THEO</button>
+        <button id="hg2">HANGAR</button>
+        <button id="mn2">MENU</button>
+      </div>`);
+      $('nextLevel').onclick = () => { campaignLevel = save.level; startGame(); };
+      $('hg2').onclick = showHangar;
+      $('mn2').onclick = mainMenu;
+    } else {
+      setScreen(`<div style="color:var(--r);font-weight:900;letter-spacing:3px">MISSION FAILED</div>
+      <div class="logo" style="text-shadow:0 0 18px #ff443888">THẤT BẠI</div>
+      <h2>${reason === 'WRECKED' ? 'PHI CƠ BỊ PHÁ HỦY' : 'NHIỆM VỤ THẤT BẠI'}</h2>
+      <div class="actions">
+        <button class="p" id="retryLevel">THỬ LẠI LEVEL ${campaignLevel}</button>
+        <button id="hg2">HANGAR</button>
+        <button id="mn2">MENU</button>
+      </div>`);
+      $('retryLevel').onclick = startGame;
+      $('hg2').onclick = showHangar;
+      $('mn2').onclick = mainMenu;
+    }
+  }
+
+  function mainMenu() {
+    playing = false;
+    isPaused = false;
+    $('hud').style.display = 'none';
+    $('ov').style.display = 'flex';
+    if (window.AndroidBridge && window.AndroidBridge.onGameStateChanged) {
+      window.AndroidBridge.onGameStateChanged(false);
+    }
+    setScreen(`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="logo.png" style="width:58px;height:58px;border-radius:12px;border:2px solid var(--c);box-shadow:0 0 18px rgba(0,229,255,0.7),0 0 32px rgba(255,68,56,0.35);object-fit:cover" alt="StormStrike Avatar">
+        <div>
+          <div style="color:var(--c);font-size:10px;letter-spacing:2px;font-weight:900">XE SĂN BÃO • 4 WORLDS • 30 LEVELS</div>
+          <div class="logo" style="margin:0;font-size:32px;line-height:1">STORM<span style="color:var(--c)">STRIKE</span></div>
+        </div>
+      </div>
+      <button class="p" id="btnQuickPlay" style="font-size:15px;padding:12px 24px;border-radius:10px;letter-spacing:1px;box-shadow:0 0 18px rgba(255,68,56,0.6)">🚀 VÀO TRẬN (CHƠI NGAY)</button>
+    </div>
+    <p class="muted" style="margin:4px 0 8px;font-size:12px">Chiến dịch 30 level: truy đuổi lốc xoáy, hút năng lượng bão, chiến đấu sinh tồn và giành cúp vô địch.</p>
+    <div class="grid">
+      <div class="it">
+        <div style="font-size:11px;color:#a9c9d8;font-weight:800">TIẾN ĐỘ CHIẾN DỊCH</div>
+        <b style="color:var(--c);font-size:16px">LEVEL ${Math.min(30, save.level || 1)}/30</b>
+        <div class="muted" style="font-size:12px;margin-top:2px">CREDITS <b style="color:var(--g)">$${save.credits}</b></div>
+      </div>
+      <div class="it">
+        <div style="font-size:11px;color:#a9c9d8;font-weight:800">ĐIỀU KHIỂN CẢM ỨNG</div>
+        <div class="muted" style="font-size:11px;line-height:1.4">
+          • <b>Joystick</b>: Lượn / Rẽ phi cơ<br>
+          • <b>UP</b>: Tiến tới / Lên cao<br>
+          • <b>BOOST</b>: Tăng tốc phản lực<br>
+          • <b>FIRE</b>: Bắn pháo · <b>SIPHON</b>: Hút năng lượng lốc
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="p" id="st">CHỌN BẢN ĐỒ</button>
+      <button id="hg">HANGAR</button>
+      <button id="sd">🔊 ÂM THANH</button>
+    </div>`);
+
+    $('btnQuickPlay').onclick = () => { buildEnv(curMapId); startGame(); };
+    $('st').onclick = showMaps;
+    $('hg').onclick = showHangar;
+    $('sd').onclick = () => { notify('ÂM THANH BẬT'); };
+  }
+
+  function showMaps() {
+    $('ov').style.display = 'flex';
+    setScreen(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <img src="logo.png" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--c);object-fit:cover" alt="Logo">
+      <div style="color:var(--c);font-weight:900;letter-spacing:2px">MAP SELECT • 4 THẾ GIỚI BÃO</div>
+    </div>
+    <h2>CHỌN BẢN ĐỒ</h2>
+    <div class="grid">
+      ${MAPS.map(m => `<div class="it mapSel ${curMapId === m.id ? 'on' : ''}" data-map="${m.id}">
+        <b>${m.n}</b>
+        <p class="muted" style="font-size:11px;margin:2px 0">${m.d}</p>
+      </div>`).join('')}
+    </div>
+    <div class="actions">
+      <button id="mapBack">QUAY LẠI</button>
+      <button class="p" id="mapLaunch">VÀO TRẬN (LAUNCH)</button>
+    </div>`);
+    document.querySelectorAll('[data-map]').forEach(el => el.onclick = () => { curMapId = el.dataset.map; showMaps(); });
+    $('mapBack').onclick = mainMenu;
+    $('mapLaunch').onclick = () => { buildEnv(curMapId); startGame(); };
+  }
+
+  function showHangar() {
+    $('ov').style.display = 'flex';
+    const its = [['speed', 'Turbine Tuning', 'Tăng tốc độ tối đa', 350], ['heat', 'Thermal Shield', 'Giảm tích nhiệt khi bắn', 300], ['siphon', 'Siphon Amplifier', 'Tăng tầm hút năng lượng', 275]];
+    setScreen(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <img src="logo.png" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--c);object-fit:cover" alt="Logo">
+      <div style="color:var(--c);font-weight:900;letter-spacing:2px">HANGAR</div>
+    </div>
+    <h2>NÂNG CẤP PHI CƠ</h2>
+    <p class="muted">Credits khả dụng: <b style="color:var(--g)">$${save.credits}</b></p>
+    <div class="grid">
+      ${its.map(([id, t, d, c]) => {
+        let cost = c + save.upgrades[id] * 150;
+        return `<div class="it">
+          <h3>${t}</h3>
+          <p class="muted" style="font-size:11px">${d}</p>
+          <div style="font-size:11px">Cấp ${save.upgrades[id]}/5</div>
+          <div style="color:var(--g);font-weight:900;margin:4px 0">$${cost}</div>
+          <button data-buy="${id}" ${save.upgrades[id] >= 5 || save.credits < cost ? 'disabled' : ''}>NÂNG CẤP</button>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="actions">
+      <button id="bk">QUAY LẠI</button>
+      <button class="p" id="lb">VÀO TRẬN (LAUNCH)</button>
+    </div>`);
+    document.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => {
+      let id = b.dataset.buy, base = { speed: 350, heat: 300, siphon: 275 }[id], cost = base + save.upgrades[id] * 150;
+      if (save.credits >= cost && save.upgrades[id] < 5) {
+        save.credits -= cost;
+        save.upgrades[id]++;
+        persist();
+        showHangar();
+      }
+    });
+    $('bk').onclick = mainMenu;
+    $('lb').onclick = () => { buildEnv(curMapId); startGame(); };
+  }
+
+  function pauseGame() {
+    if (!playing) return;
+    isPaused = true;
+    $('ov').style.display = 'flex';
+    setScreen(`<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <img src="logo.png" style="width:32px;height:32px;border-radius:8px;border:1.5px solid var(--c);object-fit:cover" alt="Logo">
+      <div style="color:var(--c);font-weight:900;letter-spacing:2px">GAME PAUSED</div>
+    </div>
+    <h2>TẠM DỪNG</h2>
+    <div class="actions">
+      <button class="p" id="btnResume">TIẾP TỤC</button>
+      <button id="btnRestart">CHƠI LẠI LEVEL NÀY</button>
+      <button id="btnExitMenu">MENU CHÍNH</button>
+    </div>`);
+    $('btnResume').onclick = () => { isPaused = false; $('ov').style.display = 'none'; };
+    $('btnRestart').onclick = startGame;
+    $('btnExitMenu').onclick = mainMenu;
+  }
+
+  $('btnPause').onclick = pauseGame;
+  window.pauseGame = pauseGame;
+
+  // Controls setup
+  let joyDir = { x: 0, y: 0 };
+  const joyEl = $('joy'), knobEl = $('knob');
+  let joyTouchId = null;
+
+  joyEl.addEventListener('touchstart', e => {
+    if (joyTouchId === null) {
+      joyTouchId = e.changedTouches[0].identifier;
+      handleJoy(e.changedTouches[0]);
+    }
+  }, { passive: false });
+
+  window.addEventListener('touchmove', e => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === joyTouchId) {
+        handleJoy(e.changedTouches[i]);
+        break;
+      }
+    }
+  }, { passive: false });
+
+  window.addEventListener('touchend', e => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === joyTouchId) {
+        joyTouchId = null;
+        joyDir.x = 0; joyDir.y = 0;
+        knobEl.style.transform = 'translate(0px,0px)';
+        break;
+      }
+    }
+  });
+
+  function handleJoy(t) {
+    const rect = joyEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    let dx = t.clientX - cx, dy = t.clientY - cy;
+    const dist = Math.hypot(dx, dy), maxR = rect.width / 2;
+    if (dist > maxR) { dx = dx / dist * maxR; dy = dy / dist * maxR; }
+    knobEl.style.transform = `translate(${dx}px,${dy}px)`;
+    joyDir.x = dx / maxR; joyDir.y = dy / maxR;
+  }
+
+  let upPressed = false, boostPressed = false, siphonPressed = false;
+  $('bUp').onpointerdown = () => { upPressed = true; };
+  $('bUp').onpointerup = () => { upPressed = false; };
+  $('bBo').onpointerdown = () => { boostPressed = true; };
+  $('bBo').onpointerup = () => { boostPressed = false; };
+  $('bSi').onpointerdown = () => { siphonPressed = true; };
+  $('bSi').onpointerup = () => { siphonPressed = false; };
+  $('bFi').onpointerdown = () => {
+    if (heat < 100) {
+      heat += 15;
+      score += 10;
+      if (window.AndroidBridge && window.AndroidBridge.vibrate) {
+        try { window.AndroidBridge.vibrate(30); } catch (e) {}
+      }
+    }
+  };
+
+  let lastTime = performance.now();
+  function animate(now) {
+    requestAnimationFrame(animate);
+    const dt = Math.min((now - lastTime) / 1000, .1);
+    lastTime = now;
+
+    if (playing && !isPaused) {
+      player.rotation.y -= joyDir.x * 2.5 * dt;
+      player.rotation.z = -joyDir.x * .5;
+
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(player.quaternion);
+      const speedMult = 1 + save.upgrades.speed * .2;
+      const currentSpeed = (upPressed ? 60 : 25) * (boostPressed ? 2.2 : 1) * speedMult;
+      vel.copy(fwd).multiplyScalar(currentSpeed);
+      player.position.addScaledVector(vel, dt);
+
+      if (player.position.y < 15) player.position.y = 15;
+      if (player.position.y > 250) player.position.y = 250;
+
+      tors.forEach(t => {
+        t.update(dt);
+        const d = player.position.distanceTo(t.position);
+        if (d < 60 * t.scale && siphonPressed) {
+          progress += dt * 25 * (1 + save.upgrades.siphon * .2);
+          score += Math.round(dt * 50);
+          if (progress >= mission.target) {
+            showLevelResult(true);
+          }
+        }
+        if (d < 20 * t.scale) {
+          showLevelResult(false, 'WRECKED');
+        }
+      });
+
+      heat = Math.max(0, heat - dt * 20);
+      $('sp').textContent = Math.round(currentSpeed * 2);
+      $('al').textContent = Math.round(player.position.y);
+      $('ht').textContent = Math.round(heat) + '%';
+      $('hf').style.width = heat + '%';
+      $('mn').textContent = Math.floor(save.credits);
+      $('sc2').textContent = score;
+      $('mt').textContent = mission.title;
+      $('mp').textContent = Math.round(progress) + '/' + mission.target;
+
+      const camOffset = new THREE.Vector3(0, 18, 36).applyQuaternion(player.quaternion);
+      camera.position.copy(player.position).add(camOffset);
+      camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 4, -20).applyQuaternion(player.quaternion)));
+    }
+
+    renderer.render(scene, camera);
+  }
+  requestAnimationFrame(animate);
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  mainMenu();
+});
+</script>
+</body>
+</html>

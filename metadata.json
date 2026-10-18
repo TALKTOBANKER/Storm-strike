@@ -1,0 +1,6 @@
+{
+  "name": "STORMSTRIKE",
+  "description": "Trò chơi 3D săn bão cảm giác mạnh với chiến dịch 30 level, 4 bản đồ, phi cơ bọc thép và cơ chế hút năng lượng lốc xoáy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
