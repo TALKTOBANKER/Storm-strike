@@ -1,0 +1,28 @@
+name: Build 11.aab version 11
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Build AAB
+        env:
+          STORE_PASSWORD: 123456
+          KEY_PASSWORD: 123456
+          KEY_ALIAS: key0
+        run: |
+          chmod +x gradlew
+          ./gradlew clean bundleRelease
+      - name: Doi ten thanh 5.aab
+        run: cp app/build/outputs/bundle/release/app-release.aab 5.aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 5-aab-version-11
+          path: 5.aab
