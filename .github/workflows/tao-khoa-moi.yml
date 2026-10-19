@@ -1,0 +1,22 @@
+name: Tao Khoa Moi 03-10
+on:
+  workflow_dispatch:
+jobs:
+  taokhoa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tao file jks moi
+        run: |
+          keytool -genkey -v -keystore new-upload.jks -alias key0 -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=StormStrike, OU=Game, O=TALKTOBANKER, C=VN"
+          keytool -list -v -keystore new-upload.jks -storepass 123456 -alias key0 | grep -E "SHA1|SHA256"
+          keytool -export -rfc -keystore new-upload.jks -alias key0 -storepass 123456 -file upload_certificate.pem
+          base64 -w 0 new-upload.jks > key.b64.txt
+          echo "=== COPY DONG DUOI DAY VAO SECRETS ==="
+          cat key.b64.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: khoa-moi-va-chung-chi
+          path: |
+            new-upload.jks
+            upload_certificate.pem
+            key.b64.txt
