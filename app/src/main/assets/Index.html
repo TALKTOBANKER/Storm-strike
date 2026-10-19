@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>STORMSTRIKE V4 — 4 Maps</title>
+<style>
+:root{--c:#00e5ff;--r:#ff4438;--g:#ffd84a}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111c;color:#f3fbff;font-family:system-ui,Arial;touch-action:none}canvas{position:fixed;inset:0;display:block;width:100%;height:100%;z-index:0}button{font:inherit;cursor:pointer;border:1px solid var(--c);background:#10283a;color:white;padding:10px 14px;font-weight:800;border-radius:8px}button.p{background:var(--r);border-color:var(--r)}button:disabled{opacity:.35}
+#hud{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}.pa{background:linear-gradient(135deg,#05101ce8,#092333bd);border:1px solid #00e5ff44;border-radius:10px;padding:9px 11px;backdrop-filter:blur(6px)}#top{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:10px}.hb{width:min(240px,34vw);height:10px;background:#233744;border-radius:8px;overflow:hidden;border:1px solid #2d4a5c;margin:5px 0}.hf{height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--g),var(--r))}
+#ret{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%)}#ret:before,#ret:after{content:"";position:absolute;background:var(--c);box-shadow:0 0 8px var(--c)}#ret:before{width:24px;height:2px;top:11px}#ret:after{width:2px;height:24px;left:11px}#toast{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);background:#000c;border:1px solid var(--c);padding:10px 16px;border-radius:8px;display:none;font-weight:900;text-align:center;max-width:90vw}#comp{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#0009;border:1px solid #234;padding:5px 12px;border-radius:20px;font-size:11px;white-space:nowrap}#arr{position:absolute;left:50%;top:66%;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:18px solid var(--g);filter:drop-shadow(0 0 8px var(--g));display:none}
+#ov{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0c283ad9,#02080ff5);padding:16px;overflow:auto}.sc{width:min(780px,100%);max-height:95vh;overflow:auto;background:#05101cf2;border:1px solid #00e5ff66;border-radius:16px;padding:22px;box-shadow:0 0 50px #00e5ff20}.logo{font-size:clamp(36px,8vw,66px);font-weight:1000;font-style:italic;margin:10px 0;text-shadow:0 0 22px #00e5ff88;line-height:1}.muted{color:#a9bfca;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}.it{border:1px solid #29495b;background:#0a1a29;padding:12px;border-radius:10px}.mapSel{border:2px solid #29495b;cursor:pointer}.mapSel.on{border-color:var(--c);background:#0c2a3a;box-shadow:0 0 18px #00e5ff44}.mapSel .prev{height:64px;border-radius:8px;margin-bottom:8px;border:1px solid #ffffff22}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+#mob{position:fixed;inset:auto 0 max(10px,env(safe-area-inset-bottom)) 0;display:none;justify-content:space-between;align-items:flex-end;gap:8px;padding:0 12px;pointer-events:none;z-index:30}
+#mob .joy{width:94px;height:94px;flex:0 0 94px;border-radius:50%;border:2px solid #8ab5c8cc;background:#071522bb;position:relative;pointer-events:auto;touch-action:none;box-shadow:0 2px 14px #0008}
+#mob .knob{position:absolute;width:34%;height:34%;border-radius:50%;background:#00e5ff88;border:2px solid var(--c);left:33%;top:33%;pointer-events:none}
+#mob .actionGroup{display:flex;gap:7px;align-items:flex-end;pointer-events:auto}
+#mob .mb{width:54px;height:54px;flex:0 0 54px;border-radius:50%;font-size:10px;line-height:1.05;padding:3px;background:#0c2c3ef5;pointer-events:auto;touch-action:none;box-shadow:0 2px 8px #0008}
+#mob .mb.r{background:#7c211eee;border-color:var(--r)}#mob .mb.go{background:#66561e;border-color:var(--g);color:var(--g)}
+@media(max-width:900px){#mob{display:flex}.sc{padding:16px}#top{top:max(7px,env(safe-area-inset-top));left:8px;right:8px;gap:6px}#top .pa{padding:6px 8px;font-size:11px}#top .pa:first-child{max-width:58vw}#top .pa:last-child{min-width:100px}.hb{width:27vw}#comp{top:76px;font-size:10px}#mission{top:108px!important;left:8px!important;max-width:190px!important;padding:7px 9px!important}#mission #mt{font-size:15px}}
+@media(max-width:390px){#mob{padding:0 8px;gap:4px}#mob .joy{width:78px;height:78px;flex-basis:78px}#mob .actionGroup{gap:4px}#mob .mb{width:45px;height:45px;flex-basis:45px;font-size:8px}}
+@media (orientation:landscape) and (max-height:500px){#mob{left:0;right:0;bottom:5px;padding:0 8px;align-items:flex-end}#mob .joy{width:72px;height:72px;flex-basis:72px}#mob .actionGroup{gap:4px}#mob .mb{width:42px;height:42px;flex-basis:42px;font-size:8px}#top{top:5px;left:5px;right:5px}#top .pa{padding:4px 6px;font-size:9px}#comp{top:5px;left:50%;font-size:9px}#mission{top:52px!important;max-width:170px!important;padding:5px 7px!important}#ret{display:none}}@media(max-width:900px){#mob{display:flex}.sc{padding:16px}#top .pa{padding:7px 8px;font-size:12px}.hb{width:30vw}#comp{top:90px}#mission{top:124px!important;max-width:210px!important}}@media (orientation:landscape) and (max-height:500px){#mob{left:8px;right:8px;bottom:8px;align-items:flex-end}#mob>div:last-child{gap:4px!important}.joy{width:82px;height:82px}.mb{width:44px;height:44px;font-size:8px}#top{top:6px;left:6px;right:6px}#top .pa{padding:5px 7px;font-size:10px}#comp{top:6px;font-size:10px}#mission{top:58px!important;max-width:190px!important;padding:6px 8px}.hb{margin:3px 0;height:7px}#ret{display:none}}
+</style><script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script></head><body>
+<canvas id="c"></canvas><div id="hud"><div id="top"><div class="pa"><div style="font-size:10px;color:#a9c9d8;font-weight:800">VEHICLE <span id="as" style="color:var(--g);pointer-events:all;cursor:pointer">🔊 ON</span> <span id="mapName" style="color:var(--c)">— VEN BIỂN</span></div><div><b id="sp">0</b> KM/H &nbsp;<b id="al">70</b>M</div><div class="hb"><div id="hf" class="hf"></div></div><div style="font-size:11px">HEAT <b id="ht">0%</b> <span id="oh" style="color:#ff655a;display:none">OVERHEAT!</span></div></div><div class="pa" style="text-align:right"><div style="font-size:10px;color:#a9c9d8;font-weight:800">CREDITS</div><div style="color:var(--g);font-weight:900;font-size:18px">$<span id="mn">0</span></div><div style="font-size:11px">SCORE <b id="sc2">0</b> KILL <b id="kl">0</b></div><div id="sh" style="display:none;background:var(--c);color:#00202b;padding:3px 8px;border-radius:4px;margin-top:6px;font-weight:900;font-size:11px">[E] HÚT!</div></div></div><div id="comp">STORM RADAR</div><div id="mission" class="pa" style="position:absolute;top:110px;left:10px;max-width:280px"><div style="font-size:10px;color:#a9c9d8;font-weight:800">CONTRACT</div><div id="mt" style="font-weight:900">—</div><div id="mp" style="font-size:11px"></div><div id="mi" style="font-size:11px;color:#bfe8f4;margin-top:5px;line-height:1.4">Hướng dẫn nhiệm vụ sẽ hiện ở đây.</div></div><div id="ret"></div><div id="arr"></div><div id="toast"></div><div id="mob"><div class="joy" id="joy"><div class="knob" id="knob"></div></div><div class="actionGroup"><button class="mb go" id="bUp">UP</button><button class="mb" id="bSi">SIPHON</button><button class="mb" id="bFi">FIRE</button><button class="mb r" id="bBo">BOOST</button></div></div></div>
+<div id="ov"><div class="sc" id="screen"></div></div>
+<script type="module">
+import * as THREE from 'three';
+const $=id=>document.getElementById(id),canvas=$('c');let renderer,scene,camera;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true});}catch(e){$('screen').innerHTML='<h2>Không khởi tạo được WebGL</h2><p class="muted">Hãy mở bằng Chrome/Edge và bật tăng tốc phần cứng.</p>';throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;
+scene=new THREE.Scene();scene.background=new THREE.Color(0x08101c);scene.fog=new THREE.FogExp2(0x0b1e33,.00125);camera=new THREE.PerspectiveCamera(76,innerWidth/innerHeight,.1,3000);
+let hemi=new THREE.HemisphereLight(0x8bcfff,0x0a141e,1.5);scene.add(hemi);let sun=new THREE.DirectionalLight(0xd8edff,2);sun.position.set(120,240,90);scene.add(sun);let lightning=new THREE.PointLight(0x9be7ff,0,900);lightning.position.set(0,260,0);scene.add(lightning);
+let AC=null,MG=null,ON=true;
+function initAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();MG=AC.createGain();MG.gain.value=ON?.55:0;MG.connect(AC.destination);let b=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*.5;let src=AC.createBufferSource();src.buffer=b;src.loop=true;let f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=2400;let rg=AC.createGain();rg.gain.value=.14;src.connect(f).connect(rg).connect(MG);src.start();let o=AC.createOscillator(),lf=AC.createBiquadFilter(),wg=AC.createGain();o.frequency.value=48;lf.type='lowpass';lf.frequency.value=240;wg.gain.value=.055;o.connect(lf).connect(wg).connect(MG);o.start();}catch(e){console.warn(e);}}
+function tone(a,b,dur,vol=.22,type='sawtooth'){if(!ON||!AC)return;let o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(a,AC.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(1,b),AC.currentTime+dur);g.gain.setValueAtTime(vol,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+dur);o.connect(g).connect(MG);o.start();o.stop(AC.currentTime+dur+.02);}
+function thunder(){tone(62,27,1,.42,'triangle');setTimeout(()=>tone(500,65,.28,.18),90);}
+function speak(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='vi-VN';u.rate=1.02;speechSynthesis.speak(u);}
+function toggleAudio(){ON=!ON;$('as').textContent=ON?'🔊 ON':'🔇 OFF';if(ON)initAudio();if(MG)MG.gain.setTargetAtTime(ON?.55:0,AC.currentTime,.04);if(ON&&AC?.state==='suspended')AC.resume();}$('as').addEventListener('click',toggleAudio);
+let ground,grid;const envGroup=new THREE.Group();scene.add(envGroup);
+const rc=2200,rp=new Float32Array(rc*3);for(let i=0;i<rc;i++){rp[i*3]=(Math.random()-.5)*700;rp[i*3+1]=Math.random()*320;rp[i*3+2]=(Math.random()-.5)*700;}let rainGeo=new THREE.BufferGeometry();rainGeo.setAttribute('position',new THREE.BufferAttribute(rp,3));let rain=new THREE.Points(rainGeo,new THREE.PointsMaterial({color:0xa6e4ff,size:1.25,transparent:true,opacity:.58}));
+scene.add(rain);
+// V3.1: boost flame trail + siphon energy burst particles
+const BOOST_N=90, boostPos=new Float32Array(BOOST_N*3), boostVel=new Float32Array(BOOST_N*3), boostLife=new Float32Array(BOOST_N);
+const boostGeo=new THREE.BufferGeometry(); boostGeo.setAttribute('position',new THREE.BufferAttribute(boostPos,3));
+const boostParticles=new THREE.Points(boostGeo,new THREE.PointsMaterial({color:0x00e5ff,size:2.3,transparent:true,opacity:.92,blending:THREE.AdditiveBlending,depthWrite:false})); scene.add(boostParticles);
+const SIPHON_N=150, siphonPos=new Float32Array(SIPHON_N*3), siphonVel=new Float32Array(SIPHON_N*3), siphonLife=new Float32Array(SIPHON_N);
+const siphonGeo=new THREE.BufferGeometry(); siphonGeo.setAttribute('position',new THREE.BufferAttribute(siphonPos,3));
+const siphonParticles=new THREE.Points(siphonGeo,new THREE.PointsMaterial({color:0xffd84a,size:2.8,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false})); scene.add(siphonParticles);
+function spawnBoostTrail(count=8){
+ let spawned=0;
+ for(let i=0;i<BOOST_N&&spawned<count;i++) if(boostLife[i]<=0){
+  const side=(Math.random()<.5?-1:1)*(2.5+Math.random()*1.4);
+  const p=player.localToWorld(new THREE.Vector3(side,-.1,8+Math.random()*2));
+  boostPos[i*3]=p.x;boostPos[i*3+1]=p.y;boostPos[i*3+2]=p.z;
+  const back=new THREE.Vector3(0,0,1).applyQuaternion(player.quaternion);
+  boostVel[i*3]=back.x*(18+Math.random()*22)+(Math.random()-.5)*5;
+  boostVel[i*3+1]=back.y*(18+Math.random()*22)+(Math.random()-.5)*5;
+  boostVel[i*3+2]=back.z*(18+Math.random()*22);
+  boostLife[i]=.35+Math.random()*.35;spawned++;
+ }
+}
+function spawnSiphonBurst(origin){
+ for(let i=0;i<SIPHON_N;i++){
+  const a=Math.random()*Math.PI*2, radius=2+Math.random()*8;
+  siphonPos[i*3]=origin.x+Math.cos(a)*radius;
+  siphonPos[i*3+1]=origin.y+(Math.random()-.5)*9;
+  siphonPos[i*3+2]=origin.z+Math.sin(a)*radius;
+  const speed=10+Math.random()*32;
+  siphonVel[i*3]=Math.cos(a)*speed;
+  siphonVel[i*3+1]=5+Math.random()*23;
+  siphonVel[i*3+2]=Math.sin(a)*speed;
+  siphonLife[i]=.45+Math.random()*.75;
+ }
+}
+function updateParticles(dt){
+ for(let i=0;i<BOOST_N;i++) if(boostLife[i]>0){
+  boostLife[i]-=dt;boostPos[i*3]+=boostVel[i*3]*dt;boostPos[i*3+1]+=boostVel[i*3+1]*dt;boostPos[i*3+2]+=boostVel[i*3+2]*dt;
+  if(boostLife[i]<=0)boostPos[i*3+1]=-999;
+ }
+ boostGeo.attributes.position.needsUpdate=true;
+ for(let i=0;i<SIPHON_N;i++) if(siphonLife[i]>0){
+  siphonLife[i]-=dt;siphonPos[i*3]+=siphonVel[i*3]*dt;siphonPos[i*3+1]+=siphonVel[i*3+1]*dt;siphonPos[i*3+2]+=siphonVel[i*3+2]*dt;
+  siphonVel[i*3+1]-=18*dt;
+  if(siphonLife[i]<=0)siphonPos[i*3+1]=-999;
+ }
+ siphonGeo.attributes.position.needsUpdate=true;
+}
+
+function mkVeh(c=0x0a141e){
+  const g=new THREE.Group();
+  const mat=new THREE.MeshStandardMaterial({color:c,metalness:.55,roughness:.38});
+  const dark=new THREE.MeshStandardMaterial({color:0x050a10,metalness:.7,roughness:.25});
+  const glass=new THREE.MeshStandardMaterial({color:0x1a5a75,metalness:.7,roughness:.12,emissive:0x0a3040,emissiveIntensity:.8,transparent:true,opacity:.85});
+  const accent=new THREE.MeshStandardMaterial({color:0x00e5ff,emissive:0x00aacc,emissiveIntensity:2.5,metalness:.3,roughness:.2});
+  const red=new THREE.MeshStandardMaterial({color:0xff4422,emissive:0xaa2200,emissiveIntensity:1.2});
+  const add=(geo,ma,x=0,y=0,z=0,rx=0,ry=0,rz=0)=>{
+    const m=new THREE.Mesh(geo,ma);
+    m.position.set(x,y,z); m.rotation.set(rx,ry,rz); g.add(m); return m;
+  };
+  // Main fuselage
+  add(new THREE.BoxGeometry(6.8,2.2,14.5),mat,0,0,0);
+  // Nose
+  add(new THREE.BoxGeometry(5.2,1.8,3.5),mat,0,-.1,7.5);
+  add(new THREE.BoxGeometry(3.8,1.2,2.2),dark,0,.2,9.2);
+  // Cockpit canopy
+  add(new THREE.BoxGeometry(4.2,1.4,5.2),glass,0,1.65,1.2);
+  add(new THREE.BoxGeometry(3.6,.35,4.8),dark,0,2.35,1.2);
+  // Side armor plates
+  add(new THREE.BoxGeometry(.55,1.8,10),mat,3.55,.1,-1);
+  add(new THREE.BoxGeometry(.55,1.8,10),mat,-3.55,.1,-1);
+  // Wings
+  add(new THREE.BoxGeometry(16,.35,3.8),mat,0,-.3,-3.5);
+  add(new THREE.BoxGeometry(4.5,.25,2.2),mat,7.5,-.15,-2.2,0,0,.15);
+  add(new THREE.BoxGeometry(4.5,.25,2.2),mat,-7.5,-.15,-2.2,0,0,-.15);
+  // Wing tips
+  add(new THREE.BoxGeometry(.4,1.2,1.8),accent,8.2,.2,-2.5);
+  add(new THREE.BoxGeometry(.4,1.2,1.8),accent,-8.2,.2,-2.5);
+  // Rear engines (twin)
+  for(let x of [-2.6,2.6]){
+    add(new THREE.CylinderGeometry(1.15,1.35,3.8,12),dark,x,.15,-8.2,Math.PI/2,0,0);
+    add(new THREE.CylinderGeometry(.7,.9,1.2,10),accent,x,.15,-10.2,Math.PI/2,0,0);
+    add(new THREE.CylinderGeometry(.95,1.1,1.6,10),mat,x,.15,-6.6,Math.PI/2,0,0);
+  }
+  // Top sensor array / radar
+  add(new THREE.CylinderGeometry(.9,.7,1.4,10),dark,0,2.0,-4.5);
+  add(new THREE.BoxGeometry(2.4,.3,1.6),accent,0,2.7,-4.5);
+  add(new THREE.SphereGeometry(.55,10,8),accent,0,3.1,-4.5);
+  // Antenna
+  add(new THREE.CylinderGeometry(.08,.08,3.2,6),dark,1.8,2.8,-3.5);
+  add(new THREE.BoxGeometry(.6,.15,.6),accent,1.8,4.4,-3.5);
+  // Front lights
+  add(new THREE.BoxGeometry(.5,.35,.4),red,2.2,.4,9.5);
+  add(new THREE.BoxGeometry(.5,.35,.4),red,-2.2,.4,9.5);
+  // Bottom thrusters
+  add(new THREE.BoxGeometry(3.5,.5,2.8),dark,0,-1.4,-1);
+  add(new THREE.CylinderGeometry(.5,.6,1.4,8),accent,1.4,-1.6,0,Math.PI/2,0,0);
+  add(new THREE.CylinderGeometry(.5,.6,1.4,8),accent,-1.4,-1.6,0,Math.PI/2,0,0);
+  // Side intakes
+  add(new THREE.BoxGeometry(1.8,1.2,2.5),dark,4.2,.3,2);
+  add(new THREE.BoxGeometry(1.8,1.2,2.5),dark,-4.2,.3,2);
+  return g;
+}
+let player=mkVeh();player.position.set(0,72,190);scene.add(player);
+let tors=[];function mkTor(x,z,s=1){
+  const g=new THREE.Group();
+  // Multi-layer funnel
+  const layers=[
+    {r1:1.8*s,r2:18*s,h:70*s,op:.75,col:0x3a4a5a},
+    {r1:2.5*s,r2:22*s,h:78*s,op:.35,col:0x5a6a7a},
+    {r1:3.5*s,r2:26*s,h:85*s,op:.18,col:0x7a90a8}
+  ];
+  layers.forEach((L,i)=>{
+    const mat=new THREE.MeshStandardMaterial({color:L.col,transparent:true,opacity:L.op,side:THREE.DoubleSide,depthWrite:false,roughness:.9});
+    const mesh=new THREE.Mesh(new THREE.CylinderGeometry(L.r1,L.r2,L.h,28,1,true),mat);
+    mesh.position.y=L.h/2 + 8*s; g.add(mesh);
+  });
+  // Wireframe outer swirl
+  const wire=new THREE.Mesh(
+    new THREE.ConeGeometry(28*s,90*s,18,1,true),
+    new THREE.MeshBasicMaterial({color:0x9ecfff,transparent:true,opacity:.16,wireframe:true})
+  );
+  wire.position.y=45*s; g.add(wire);
+  // Core glow light
+  const tl=new THREE.PointLight(s>1.2?0xff6b35:0xffe35b,22,110*s);
+  tl.position.set(0,18*s,0); g.add(tl);
+  // Inner energy core
+  const core=new THREE.Mesh(
+    new THREE.CylinderGeometry(1.2*s,4*s,60*s,12,1,true),
+    new THREE.MeshBasicMaterial({color:0xffcc66,transparent:true,opacity:.25,side:THREE.DoubleSide})
+  );
+  core.position.y=35*s; g.add(core);
+  // Debris / sucked objects
+  const bits=[];
+  const colors=[0x8b3a2a,0x3a4a5a,0x6b5a3a,0x4a3a2a,0x2a3a4a,0x5a4a3a];
+  for(let i=0;i<28;i++){
+    const size=i<8?3.5:1.2+Math.random()*2;
+    const m=new THREE.Mesh(
+      new THREE.BoxGeometry(size,size*.6,size*.8),
+      new THREE.MeshStandardMaterial({color:colors[i%colors.length],roughness:.8,metalness:.1})
+    );
+    g.add(m);
+    bits.push({
+      m,
+      a:Math.random()*6.28,
+      r:(8+Math.random()*20)*s,
+      y:4+Math.random()*75*s,
+      sp:.5+Math.random()*1.4,
+      ry:Math.random()*3
+    });
+  }
+  // Dust ring at base
+  const dust=new THREE.Mesh(
+    new THREE.TorusGeometry(14*s,2.5*s,8,24),
+    new THREE.MeshBasicMaterial({color:0x8a7a5a,transparent:true,opacity:.35})
+  );
+  dust.rotation.x=Math.PI/2; dust.position.y=3; g.add(dust);
+  g.position.set(x,-35,z);
+  g.userData={s,bits,drift:new THREE.Vector3((Math.random()-.5)*.45,0,(Math.random()-.5)*.45),spin:.35+Math.random()*.45};
+  scene.add(g); tors.push(g);
+}
+
+const MAPS=[
+{id:'coastal',n:'VEN BIỂN',d:'Thị trấn ngập nước, cầu cảng và không gian mở.',bg:0x08101c,fg:0x0b1e33,gr:0x0f2436,hl:0x8bcfff,sun:0xd8edff,tor:[[-110,-120,1.35],[140,-60,1.15],[20,-310,1.55],[-260,90,1],[260,180,.9]],heat:1,wind:.45,rv:1,rain:0xa6e4ff},
+{id:'foundry',n:'NHÀ MÁY',d:'Ống khói, khu công nghiệp và nhiệt cao.',bg:0x140d08,fg:0x2e1e0f,gr:0x221a12,hl:0xffb088,sun:0xff7b2e,tor:[[-90,-100,1.5],[120,-80,1.3],[0,-260,1.7],[-220,60,1.2],[200,140,1.1],[-40,180,1]],heat:1.35,wind:.6,rv:1.15,rain:0xffcc99},
+{id:'megacity',n:'MEGACITY',d:'Cao ốc dày đặc và ngõ hẹp khó bay.',bg:0x060a14,fg:0x0a1e2e,gr:0x0c141e,hl:0x88aacc,sun:0x9ab8d0,tor:[[-80,-90,1.25],[100,-40,1.1],[-20,-280,1.4],[-180,80,1.05],[180,160,.95],[0,120,1.15]],heat:1.15,wind:.5,rv:1.22,rain:0x8fb8d8},
+{id:'eye',n:'MẮT BÃO',d:'Trên mây, lốc trung tâm khổng lồ và nguy hiểm.',bg:0x0a1428,fg:0x123055,gr:0x1a2b42,hl:0xaaccff,sun:0xc8e8ff,tor:[[0,-140,2.2],[-180,-120,1.1],[180,-100,1.1],[-120,150,1],[140,170,.9],[260,-30,.85],[-260,-40,.85]],heat:1.2,wind:.9,rv:1.32,rain:0xc8e6ff}
+];
+let curMapId=localStorage.getItem('stormstrike_map')||'coastal';
+function getMap(id){return MAPS.find(m=>m.id===id)||MAPS[0]}
+function clearEnv(){while(envGroup.children.length){const o=envGroup.children.pop();if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}}for(const t of tors)scene.remove(t);tors.length=0;}
+function buildEnv(id){
+ clearEnv();const m=getMap(id);curMapId=m.id;try{localStorage.setItem('stormstrike_map',curMapId)}catch{}
+ scene.background.setHex(m.bg);scene.fog.color.setHex(m.fg);hemi.color.setHex(m.hl);sun.color.setHex(m.sun);
+ if($('mapName'))$('mapName').textContent='— '+m.n;
+ ground=new THREE.Mesh(new THREE.PlaneGeometry(3000,3000),new THREE.MeshStandardMaterial({color:m.gr,roughness:.95}));ground.rotation.x=-Math.PI/2;ground.position.y=-35;envGroup.add(ground);
+ grid=new THREE.GridHelper(2400,60,m.id==='foundry'?0x7b4323:0x1a3a56,m.id==='foundry'?0x392416:0x112a40);grid.position.y=-34.6;envGroup.add(grid);
+ const mat=(color,roughness=.82,metalness=.05)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+ const box=(w,h,d,x,y,z,color)=>{let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(color));o.position.set(x,y,z);envGroup.add(o);return o};
+ const road=(w,d,x,z,color=0x202b35)=>{box(w,.35,d,x,-34.45,z,color);for(let zz=z-d/2+12;zz<z+d/2;zz+=28)box(Math.max(1,w*.018),.12,9,x,-34.22,zz,0xb9c4c7)};
+ if(m.id==='coastal'){
+  const water=new THREE.Mesh(new THREE.PlaneGeometry(1700,1200),new THREE.MeshStandardMaterial({color:0x08708b,transparent:true,opacity:.72,roughness:.25,metalness:.1}));water.rotation.x=-Math.PI/2;water.position.set(0,-34.7,470);envGroup.add(water);
+  road(720,34,0,80,0x384956);road(30,560,-190,-100,0x384956);
+  for(let i=0;i<8;i++){let x=-300+i*85,h=18+(i%3)*8,z=-65-(i%2)*48;box(58,h,46,x,-35+h/2,z,[0x9a7964,0x667e89,0x8b9b9e,0x536d7a][i%4]);box(60,2,48,x,-35+h+1,z,0x334b59)}
+  for(let i=0;i<7;i++)box(10,2,130,-260+i*80,-32,235,0x526b79);box(360,4,20,0,-18,110,0x53616b);
+  for(let i=0;i<26;i++){let x=(Math.random()-.5)*1050,z=-500+Math.random()*950,h=10+Math.random()*26;box(24+Math.random()*25,h,22+Math.random()*22,x,-35+h/2,z,[0x5a7180,0x8b9a9e,0x6d7e87][i%3])}
+ } else if(m.id==='foundry'){
+  road(760,42,0,40,0x3a3028);road(36,620,-150,-110,0x3a3028);road(32,620,180,-120,0x3a3028);
+  for(let i=0;i<22;i++){let x=(Math.random()-.5)*1050,z=-650+Math.random()*1200,w=32+Math.random()*52,d=30+Math.random()*55,h=12+Math.random()*25;box(w,h,d,x,-35+h/2,z,[0x493d35,0x5b4b3b,0x343b42][i%3]);box(w+2,2,d+2,x,-35+h+1,z,0x806047);if(i%2===0){let ch=new THREE.Mesh(new THREE.CylinderGeometry(4,4,35+Math.random()*25,10),mat(0x55565a,.7,.25));ch.position.set(x+w*.25,-5,z-d*.2);envGroup.add(ch)}}
+  for(let i=0;i<12;i++){let x=-480+i*85,z=-280-(i%3)*75,ch=new THREE.Mesh(new THREE.CylinderGeometry(4,5,52+(i%4)*9,12),mat(0x4a4645,.75,.2));ch.position.set(x,-9,z);envGroup.add(ch);box(9,2,9,x,-34,z,0xff6a2d)}
+ } else if(m.id==='megacity'){
+  road(900,48,0,30,0x1d2b38);road(42,1050,-210,-180,0x1d2b38);road(42,1050,210,-180,0x1d2b38);
+  for(let row=0;row<7;row++)for(let col=0;col<9;col++){if(col===3||col===4||row===3)continue;let x=(col-4)*88+(Math.random()-.5)*12,z=-650+row*115+(Math.random()-.5)*15,w=42+Math.random()*24,d=42+Math.random()*24,h=28+Math.random()*95,color=new THREE.Color().setHSL(.56+Math.random()*.08,.2,.12+Math.random()*.12);box(w,h,d,x,-35+h/2,z,color);box(w*.82,1,d*.82,x,-35+h+.6,z,0x3b5368);if(Math.random()<.6)for(let yy=-25;yy<h-8;yy+=12)box(w*.55,1.2,.5,x,-35+yy,z+d/2+.3,0x5c9bb0)}
+  for(let i=0;i<12;i++)box(16,1,10,0,-34.3,-600+i*85,0xe7c95e);
+ } else if(m.id==='eye'){
+  for(let i=0;i<45;i++){let cl=new THREE.Mesh(new THREE.PlaneGeometry(180+Math.random()*340,180+Math.random()*340),new THREE.MeshBasicMaterial({color:i%3===0?0x9fcfff:0xc8e6ff,transparent:true,opacity:.08+Math.random()*.09,side:THREE.DoubleSide,depthWrite:false}));cl.rotation.x=-Math.PI/2;cl.position.set((Math.random()-.5)*1700,-31+Math.random()*15,(Math.random()-.5)*1700);envGroup.add(cl)}
+  road(520,18,0,120,0x324f70);for(let i=0;i<14;i++){let x=(Math.random()-.5)*900,z=-650+Math.random()*1050,h=12+Math.random()*34;box(14,h,14,x,-35+h/2,z,0x536c89);box(22,2,22,x,-35+h+1,z,0x8ebce5)}
+ }
+ for(let i=0;i<34;i++){let side=i%2?1:-1,x=side*(470+Math.random()*430),z=-700+Math.random()*1200,h=18+Math.random()*55;box(24+Math.random()*34,h,26+Math.random()*38,x,-35+h/2,z,m.id==='foundry'?0x393632:(m.id==='coastal'?0x405a69:0x172b40))}
+ for(const t of m.tor)mkTor(t[0],t[1],t[2]);if(typeof rain!=='undefined'&&rain.material)rain.material.color.setHex(m.rain);
+}
+buildEnv(curMapId);
+
+let rivals=[];for(let i=0;i<4;i++){let r=mkVeh(i===0?0x7a2320:0x1e2a33);r.scale.setScalar(.68);r.position.set((Math.random()-.5)*420,58+Math.random()*30,(Math.random()-.5)*420);r.userData={hp:3,shoot:1+Math.random()*2};scene.add(r);rivals.push(r);}
+let bullets=[];function fire(from,dir,owner){let m=new THREE.Mesh(new THREE.SphereGeometry(.7,8,8),new THREE.MeshBasicMaterial({color:owner==='player'?0xffe35b:0xff3b30}));m.position.copy(from);m.userData={dir:dir.clone().normalize(),life:100,owner};scene.add(m);bullets.push(m);if(owner==='player')tone(900,120,.13,.16,'square');}function remB(i){let b=bullets[i];scene.remove(b);b.geometry.dispose();b.material.dispose();bullets.splice(i,1);}
+const SAVE='stormstrike_save_v2',DEF={credits:0,best:0,totalKills:0,upgrades:{speed:0,heat:0,siphon:0},completed:[],selected:0,level:1,trophy:false};function loadSave(){try{let s=JSON.parse(localStorage.getItem(SAVE)||'{}');return{...DEF,...s,upgrades:{...DEF.upgrades,...(s.upgrades||{})},completed:Array.isArray(s.completed)?s.completed:[],level:Math.max(1,Math.min(30,Number(s.level)||1)),trophy:!!s.trophy};}catch{return JSON.parse(JSON.stringify(DEF));}}let save=loadSave();function persist(){try{localStorage.setItem(SAVE,JSON.stringify(save));}catch{}}
+const contracts=[{id:'siphon3',title:'Hút năng lượng bão',desc:'Hút 3 lần từ lốc xoáy (E).',target:3,reward:350,kind:'siphon'},{id:'kill2',title:'Dọn đường trên không',desc:'Hạ 2 đối thủ.',target:2,reward:400,kind:'kill'},{id:'survive600',title:'Sống sót trong bão',desc:'Sống sót trong bão.',target:600,reward:300,kind:'time'}];
+let mission=contracts[Math.max(0,Math.min(contracts.length-1,save.selected|0))],progress=0,done=false,playing=false,heat=0,over=false,score=0,kills=0,elapsed=0,money=save.credits,health=100,vel=new THREE.Vector3(),keys={},boost=false,firing=false,upHeld=false,joyX=0,joyY=0,lastShot=0,lastToast=0,lightTimer=4;
+function formatMissionTime(seconds){seconds=Math.max(0,Math.floor(seconds));const h=Math.floor(seconds/3600),m=Math.floor((seconds%3600)/60),s=seconds%60;return h?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');}
+function notify(m){$('toast').textContent=m;$('toast').style.display='block';lastToast=performance.now();}
+let campaignLevel=Math.max(1,Math.min(30,Number(save.level)||1));
+function missionForLevel(level){
+ const base=contracts[(level-1)%contracts.length];
+ const step=Math.floor((level-1)/5);
+ if(base.kind==='siphon')return {...base,target:Math.min(8,3+step),title:`Level ${level}: Hút năng lượng bão`,instructions:`MỤC TIÊU: Hút ${Math.min(8,3+step)} lần. Bay theo mũi tên vàng đến gần lốc rồi nhấn E hoặc SIPHON. Giữ khoảng cách an toàn và né đạn.`};
+ if(base.kind==='kill')return {...base,target:Math.min(10,2+step),title:`Level ${level}: Dọn đường trên không`,instructions:`MỤC TIÊU: Hạ ${Math.min(10,2+step)} đối thủ. Dùng chuột trái hoặc FIRE để bắn, SHIFT/BOOST để né đòn. Theo dõi thanh HEAT, tránh bắn liên tục quá lâu.`};
+ const survivalSeconds=Math.round(600+(level-1)*3000/29);
+ const survivalLabel=Math.floor(survivalSeconds/60)+' phút'+(survivalSeconds%60?' '+(survivalSeconds%60)+' giây':'');
+ return {...base,target:survivalSeconds,title:`Level ${level}: Sống sót trong bão`,instructions:`MỤC TIÊU: Sống sót ${survivalLabel} (${survivalSeconds} giây). Di chuyển liên tục, dùng BOOST để thoát nguy hiểm, tránh bay sát lốc và né đạn đối thủ. Thời gian nhiệm vụ tăng dần từ 10 phút ở level 3 đến 1 giờ ở level 30.`};
+}
+function showLevelResult(win,reason=''){
+ playing=false;
+ save.credits=Math.floor(money);save.best=Math.max(save.best,score);save.totalKills+=kills;
+ if(win){
+   const cleared=campaignLevel;
+   save.level=Math.min(30,campaignLevel+1);
+   if(cleared===30)save.trophy=true;
+   const bonus=150+campaignLevel*25;money+=bonus;save.credits=Math.floor(money);
+   if(!save.completed.includes('level-'+cleared))save.completed.push('level-'+cleared);
+   save.level=Math.min(30,campaignLevel+1);persist();
+   $('hud').style.display='none';$('ov').style.display='flex';
+   const champion=cleared>=30;
+   $('screen').innerHTML=`<div style="color:var(--c);font-weight:900;letter-spacing:3px">${champion?'CAMPAIGN CHAMPION':'LEVEL COMPLETE'}</div>
+   <div class="logo">${champion?'🏆':'✓'} <span style="color:var(--c)">${champion?'VÔ ĐỊCH STORMSTRIKE':'HOÀN THÀNH NHIỆM VỤ'}</span></div>
+   <h2>${champion?'BẠN ĐÃ CHINH PHỤC 30 LEVEL!':`LEVEL ${cleared}/30 HOÀN THÀNH`}</h2>
+   ${champion?'<div style="font-size:72px;text-align:center;filter:drop-shadow(0 0 18px #ffd84a)">🏆</div><p class="muted">Cúp Vô Địch STORMSTRIKE đã được trao và lưu vào thành tích của bạn.</p>':'<p class="muted">Nhiệm vụ hoàn tất! Chuẩn bị cho thử thách tiếp theo.</p>'}
+   <div class="grid"><div class="it"><h3>PHẦN THƯỞNG</h3><b style="color:var(--g)">+$${bonus}</b></div><div class="it"><h3>ĐIỂM</h3><b>${score}</b></div><div class="it"><h3>TIẾN ĐỘ</h3><b>${cleared}/30</b></div></div>
+   <div class="actions"><button class="p" id="nextLevel">${champion?'CHƠI LẠI TỪ LEVEL 1':'LEVEL TIẾP THEO'}</button><button id="hg2">HANGAR</button><button id="mn2">MENU</button></div>`;
+   $('nextLevel').onclick=()=>{if(champion){save.level=1;persist();}startGame();};$('hg2').onclick=showHangar;$('mn2').onclick=mainMenu;
+   speak(champion?'Chúc mừng! Bạn đã hoàn thành ba mươi level và nhận cúp vô địch.':'Hoàn thành nhiệm vụ level '+cleared+'.');
+ }else{
+   persist();$('hud').style.display='none';$('ov').style.display='flex';
+   $('screen').innerHTML=`<div style="color:var(--r);font-weight:900;letter-spacing:3px">FLIGHT FAILED</div><div class="logo" style="text-shadow:0 0 18px #ff443888">MISSION FAILED</div><h2>${reason==='WRECKED'?'PHI CƠ BỊ PHÁ HỦY':'THẤT BẠI'}</h2><p class="muted">${reason==='WRECKED'?'Sức bền phi cơ đã về 0. Hãy nâng cấp hoặc thử lại level này.':reason}</p><div class="grid"><div class="it"><h3>LEVEL</h3><b>${campaignLevel}/30</b></div><div class="it"><h3>ĐIỂM</h3><b>${score}</b></div><div class="it"><h3>HẠ GỤC</h3><b>${kills}</b></div></div><div class="actions"><button class="p" id="retryLevel">THỬ LẠI LEVEL ${campaignLevel}</button><button id="hg2">HANGAR</button><button id="mn2">MENU</button></div>`;
+   $('retryLevel').onclick=startGame;$('hg2').onclick=showHangar;$('mn2').onclick=mainMenu;
+   speak('Nhiệm vụ thất bại. '+(reason==='WRECKED'?'Phi cơ bị phá hủy.':'Hãy thử lại.'));
+ }
+}
+function completeMission(){if(done||!playing)return;done=true;const bonus=150+campaignLevel*25;notify('LEVEL '+campaignLevel+' HOÀN THÀNH! +$'+bonus);showLevelResult(true);}
+
+function updHUD(){ $('sp').textContent=Math.round(vel.length()*92+(boost?35:0));$('al').textContent=Math.round(player.position.y);$('ht').textContent=Math.round(heat)+'%';$('hf').style.width=heat+'%';$('oh').style.display=over?'inline':'none';$('mn').textContent=Math.floor(money);$('sc2').textContent=score;$('kl').textContent=kills;$('mt').textContent=mission.title;$('mi').textContent=mission.instructions||'Hoàn thành mục tiêu để mở khóa level tiếp theo.';$('mp').textContent=mission.kind==='time'?formatMissionTime(progress)+' / '+formatMissionTime(mission.target):progress+'/'+mission.target;if(done)$('mp').textContent='HOÀN THÀNH +$'+mission.reward;let best=null,dist=Infinity;for(let t of tors){let d=Math.hypot(t.position.x-player.position.x,t.position.z-player.position.z);if(d<dist){dist=d;best=t;}}if(best){let ang=Math.atan2(best.position.x-player.position.x,best.position.z-player.position.z)-player.rotation.y;$('arr').style.display=dist<600?'block':'none';$('arr').style.transform='translateX(-50%) rotate('+(ang*180/Math.PI)+'deg)';$('comp').textContent='LEVEL '+campaignLevel+'/30 • LỐC GẦN NHẤT '+Math.round(dist)+'m '+(dist<75?'— BẤM E ĐỂ HÚT':'');$('sh').style.display=dist<65*(1+save.upgrades.siphon*.22)?'block':'none';}}
+function mainMenu(){playing=false;$('hud').style.display='none';$('ov').style.display='flex';$('screen').innerHTML=`<div style="color:var(--c);font-size:11px;letter-spacing:3px;font-weight:900">ARMORED FLIGHT • FOUR WORLDS</div><div class="logo">STORM<span style="color:var(--c)">STRIKE</span> V4</div><p class="muted">Chiến dịch 30 level: truy đuổi lốc xoáy, hoàn thành mục tiêu, nhận thưởng và giành cúp vô địch.</p><div class="grid"><div class="it"><h3>CHIẾN DỊCH 30 LEVEL</h3><b style="color:var(--c)">LEVEL ${Math.min(30,save.level||1)}/30 ${save.trophy?'🏆 CÚP ĐÃ NHẬN':''}</b><p class="muted" style="font-size:12px">STORM CREDITS <b style="color:var(--g)">$${save.credits} · BEST ${save.best}</b></p><p class="muted" style="font-size:12px">Tổng hạ gục: ${save.totalKills}</p></div><div class="it"><h3>ĐIỀU KHIỂN</h3><p class="muted" style="font-size:12px"><b>W/S</b> tiến/lùi · <b>A/D</b> rẽ<br><b>SPACE/C</b> lên/xuống · <b>SHIFT</b> tăng tốc<br><b>Chuột trái</b> bắn · <b>E</b> hút năng lượng</p></div></div><div class="actions"><button class="p" id="st">CHỌN BẢN ĐỒ</button><button id="hg">HANGAR</button><button id="ms">NHIỆM VỤ</button><button id="sd">🔊 BẬT ÂM THANH + GIỌNG ĐỌC</button></div><p class="muted" style="font-size:11px;margin-top:12px">Mẹo: giữ SHIFT để thấy vệt lửa xanh; hút E gần lốc sẽ tạo burst năng lượng vàng.</p>`;$('st').onclick=showMaps;$('hg').onclick=showHangar;$('ms').onclick=showMissions;$('sd').onclick=()=>{initAudio();if(AC?.state==='suspended')AC.resume();speak('Chào mừng phi công StormStrike. Dùng W để tiến tới, A D để rẽ, Space để lên cao, Shift để tăng tốc, chuột trái để bắn và E để hút năng lượng lốc xoáy khi ở gần.');notify('ÂM THANH ĐÃ BẬT');};}
+function showMaps(){$('ov').style.display='flex';$('screen').innerHTML=`<div style="color:var(--c);font-weight:900;letter-spacing:2px">MAP SELECT • V4</div><h2>CHỌN BẢN ĐỒ</h2><div class="grid">${MAPS.map(m=>`<div class="it mapSel ${curMapId===m.id?'on':''}" data-map="${m.id}"><div class="prev" style="display:flex;align-items:center;justify-content:center;font-size:34px;background:radial-gradient(circle at 50% 35%,#${m.hl.toString(16).padStart(6,'0')}66,transparent 55%),linear-gradient(135deg,#${m.bg.toString(16).padStart(6,'0')},#${m.gr.toString(16).padStart(6,'0')})">${({coastal:"🌊",foundry:"🏭",megacity:"🏙️",eye:"🌀"})[m.id]}</div><b>${m.n}</b><p class="muted" style="font-size:12px">${m.d}</p><small>Độ khó ${m.lv||({'coastal':1,'foundry':2,'megacity':3,'eye':4}[m.id])}/4</small></div>`).join('')}</div><div class="actions"><button id="mapBack">QUAY LẠI</button><button id="mapMission">CHỌN NHIỆM VỤ</button><button class="p" id="mapLaunch">LAUNCH</button></div>`;document.querySelectorAll('[data-map]').forEach(el=>el.onclick=()=>{curMapId=el.dataset.map;showMaps()});$('mapBack').onclick=mainMenu;$('mapMission').onclick=showMissions;$('mapLaunch').onclick=()=>{buildEnv(curMapId);startGame()};}
+function showHangar(){$('ov').style.display='flex';let its=[['speed','Turbine Tuning','Tăng tốc độ tối đa',350],['heat','Thermal Shield','Giảm tích nhiệt khi bắn',300],['siphon','Siphon Amplifier','Tăng tầm hút năng lượng',275]];$('screen').innerHTML=`<div style="color:var(--c);font-weight:900;letter-spacing:2px">HANGAR</div><h2>NÂNG CẤP PHI CƠ</h2><p class="muted">Credits: <b style="color:var(--g)">$${save.credits}</b></p><div class="grid">${its.map(([id,t,d,c])=>{let cost=c+save.upgrades[id]*150;return `<div class="it"><h3>${t}</h3><p class="muted" style="font-size:12px">${d}</p><div style="font-size:11px">Cấp ${save.upgrades[id]}/5</div><div style="color:var(--g);font-weight:900;margin:6px 0">$${cost}</div><button data-buy="${id}" ${save.upgrades[id]>=5||save.credits<cost?'disabled':''}>NÂNG CẤP</button></div>`}).join('')}</div><div class="actions"><button id="bk">QUAY LẠI</button><button class="p" id="lb">LAUNCH</button></div>`;document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>{let id=b.dataset.buy,base={speed:350,heat:300,siphon:275}[id],cost=base+save.upgrades[id]*150;if(save.credits>=cost&&save.upgrades[id]<5){save.credits-=cost;save.upgrades[id]++;money=save.credits;persist();showHangar();}});$('bk').onclick=mainMenu;$('lb').onclick=()=>{buildEnv(curMapId);startGame();};}
+function showMissions(){$('ov').style.display='flex';$('screen').innerHTML=`<div style="color:var(--c);font-weight:900;letter-spacing:2px">MISSION CONTROL</div><h2>HỢP ĐỒNG</h2>${contracts.map((m,i)=>`<div class="it" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0"><div><b>${m.title}</b><div class="muted" style="font-size:11px">${m.desc}</div><div style="color:var(--g);font-weight:800">Thưởng +$${m.reward} ${save.completed.includes(m.id)?'✓ ĐÃ XONG':''}</div></div><button data-m="${i}" style="${save.selected===i?'background:var(--c);color:#00202b':''}">${save.selected===i?'ĐANG CHỌN':'CHỌN'}</button></div>`).join('')}<div class="actions"><button id="bk2">QUAY LẠI</button><button class="p" id="lb2">BAY NHIỆM VỤ NÀY</button></div>`;document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{save.selected=Number(b.dataset.m);mission=contracts[save.selected];persist();showMissions();});$('bk2').onclick=mainMenu;$('lb2').onclick=()=>{buildEnv(curMapId);startGame();};}
+function startGame(){initAudio();if(AC?.state==='suspended')AC.resume();campaignLevel=Math.max(1,Math.min(30,Number(save.level)||1));mission=missionForLevel(campaignLevel);progress=0;done=false;elapsed=0;heat=0;over=false;score=0;kills=0;health=100;money=save.credits;vel.set(0,0,0);player.position.set(0,72,190);player.rotation.set(0,0,0);rivals.forEach(r=>{r.visible=true;r.userData.hp=3;r.position.set((Math.random()-.5)*420,58+Math.random()*30,(Math.random()-.5)*420);r.userData.shoot=1+Math.random()*2;});for(let i=bullets.length-1;i>=0;i--)remB(i);playing=true;$('hud').style.display='block';$('ov').style.display='none';speak('Level '+campaignLevel+'. '+(mission.instructions||mission.desc||'Hoàn thành mục tiêu nhiệm vụ.')+'.');notify('LEVEL '+campaignLevel+' • '+mission.title);updHUD();}
+function finishGame(reason){if(!playing)return;showLevelResult(false,reason);}
+function trySiphon(){if(!playing)return;let best=null,dist=Infinity;for(let t of tors){let d=Math.hypot(t.position.x-player.position.x,t.position.z-player.position.z);if(d<dist){dist=d;best=t;}}let range=65*(1+save.upgrades.siphon*.22);if(best&&dist<range){let gain=45+Math.floor(best.userData.s*30);money+=gain;score+=120;heat=Math.min(100,heat+10);if(mission.kind==='siphon'&&!done){progress++;if(progress>=mission.target)completeMission();}best.scale.setScalar(1.08);setTimeout(()=>best.scale.setScalar(1),140);spawnSiphonBurst(best.position.clone().add(new THREE.Vector3(0,22*best.userData.s,0)));tone(320,950,.55,.25,'sine');notify('HÚT THÀNH CÔNG +$'+gain);}else notify('Bay gần lốc hơn! Cần dưới '+Math.round(range)+'m');}
+function firePlayer(){if(!playing||over)return;let dir=new THREE.Vector3(0,0,-1).applyQuaternion(player.quaternion),pos=player.position.clone().add(dir.clone().multiplyScalar(9));fire(pos,dir,'player');heat=Math.min(100,heat+7*getMap(curMapId).heat-save.upgrades.heat*.7);if(heat>=100)over=true;}
+function hold(id,down,up=()=>{}){let el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();el.setPointerCapture?.(e.pointerId);down();});['pointerup','pointercancel','lostpointercapture'].forEach(n=>el.addEventListener(n,e=>{e.preventDefault();up();}));}
+addEventListener('keydown',e=>{let k=e.key.toLowerCase();keys[k]=true;if([' ','arrowup','arrowdown'].includes(k))e.preventDefault();if(k==='e')trySiphon();if(k==='escape'&&playing)mainMenu();});addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+canvas.addEventListener('pointerdown',e=>{if(playing){firing=true;canvas.setPointerCapture?.(e.pointerId);}});addEventListener('pointerup',()=>firing=false);addEventListener('pointercancel',()=>firing=false);
+hold('bUp',()=>{upHeld=true;keys['w']=true;},()=>{upHeld=false;keys['w']=false;});hold('bSi',trySiphon);hold('bFi',()=>firing=true,()=>firing=false);hold('bBo',()=>{boost=true;keys['shift']=true;},()=>{boost=false;keys['shift']=false;});
+const joy=$('joy'),knob=$('knob');let joyId=null;joy.addEventListener('pointerdown',e=>{e.preventDefault();joyId=e.pointerId;joy.setPointerCapture(e.pointerId);moveJoy(e);});joy.addEventListener('pointermove',e=>{if(e.pointerId===joyId)moveJoy(e);});function moveJoy(e){let r=joy.getBoundingClientRect(),x=e.clientX-(r.left+r.width/2),y=e.clientY-(r.top+r.height/2),max=r.width*0.32,l=Math.hypot(x,y);if(l>max){x=x/l*max;y=y/l*max;}joyX=x/max;joyY=y/max;knob.style.left='calc(30% + '+x+'px)';knob.style.top='calc(30% + '+y+'px)';}function resetJoy(){joyId=null;joyX=joyY=0;knob.style.left='30%';knob.style.top='30%';}['pointerup','pointercancel','lostpointercapture'].forEach(n=>joy.addEventListener(n,resetJoy));
+function resizeGame(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));}
+addEventListener('resize',resizeGame);addEventListener('orientationchange',()=>setTimeout(resizeGame,180));
+document.querySelectorAll('#mob button,#joy').forEach(el=>{el.addEventListener('contextmenu',e=>e.preventDefault());el.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});});
+const clock=new THREE.Clock();let frame=0;
+function update(dt){updateParticles(dt);if(!playing)return;elapsed+=dt;if(mission.kind==='time'&&!done){progress+=dt;if(progress>=mission.target)completeMission();}
+ const turn=(keys['a']?1:0)-(keys['d']?1:0)-joyX,thrust=(keys['w']?1:0)-(keys['s']?1:0)-joyY,vertical=((keys[' ']||keys['arrowup']||upHeld)?1:0)-((keys['c']||keys['arrowdown'])?1:0);
+ player.rotation.y+=turn*1.35*dt;let forward=new THREE.Vector3(0,0,-1).applyQuaternion(player.quaternion),maxSpeed=((keys['shift']||boost)?105:68)*(1+save.upgrades.speed*.12);vel.addScaledVector(forward,thrust*maxSpeed*dt);vel.y+=vertical*30*dt;vel.multiplyScalar(Math.pow(thrust===0?.91:.975,dt*60));vel.clampLength(0,maxSpeed);player.position.addScaledVector(vel,dt);player.position.y=THREE.MathUtils.clamp(player.position.y,3,260);player.rotation.z=THREE.MathUtils.damp(player.rotation.z,-turn*.16,4,dt);
+ if(over){heat=Math.max(0,heat-24*dt);if(heat<30)over=false;}else heat=Math.max(0,heat-(8+save.upgrades.heat*2)*dt);
+ if(boost||keys['shift'])spawnBoostTrail(7);if(firing&&performance.now()-lastShot>170){firePlayer();lastShot=performance.now();}
+ for(let t of tors){t.rotation.y+=t.userData.spin*dt;t.position.x+=t.userData.drift.x*getMap(curMapId).wind*dt;t.position.z+=t.userData.drift.z*getMap(curMapId).wind*dt;for(let b of t.userData.bits){b.a+=b.sp*dt;b.m.position.set(Math.cos(b.a)*b.r,b.y,Math.sin(b.a)*b.r);b.m.rotation.y=b.a;}}
+ for(let i=0;i<rivals.length;i++){let r=rivals[i];if(!r.visible)continue;let to=player.position.clone().sub(r.position),d=to.length();r.rotation.y=Math.atan2(-to.x,-to.z);let rf=new THREE.Vector3(0,0,-1).applyQuaternion(r.quaternion);r.position.addScaledVector(rf,(d>85?24:8)*getMap(curMapId).rv*(1+(campaignLevel-1)*.018)*dt);r.position.y+=Math.sin(elapsed*1.6+i)*dt*4;r.userData.shoot-=dt;if(d<300&&r.userData.shoot<=0){fire(r.position.clone(),to.normalize(),'enemy');r.userData.shoot=Math.max(.55,1.5+Math.random()*1.8-(campaignLevel-1)*.025);}}
+ for(let i=bullets.length-1;i>=0;i--){let b=bullets[i];b.position.addScaledVector(b.userData.dir,(b.userData.owner==='player'?190:115)*dt);b.userData.life-=dt*60;let rem=b.userData.life<=0||Math.abs(b.position.x)>1200||Math.abs(b.position.z)>1200||b.position.y< -40||b.position.y>500;
+  if(!rem&&b.userData.owner==='player'){for(let r of rivals){if(r.visible&&b.position.distanceTo(r.position)<7){r.userData.hp--;rem=true;if(r.userData.hp<=0){r.visible=false;kills++;score+=250;money+=65;if(mission.kind==='kill'&&!done){progress++;if(progress>=mission.target)completeMission();}notify('ĐỐI THỦ BỊ HẠ +$65');}break;}}}
+  else if(!rem&&b.userData.owner==='enemy'&&b.position.distanceTo(player.position)<7){rem=true;health-=12;score=Math.max(0,score-15);if(health<=0){finishGame('WRECKED');return;}}
+  if(rem)remB(i);}
+ for(let t of tors){let d=Math.hypot(t.position.x-player.position.x,t.position.z-player.position.z);if(d<28&&Math.abs(player.position.y-15)<100)health-=(7+campaignLevel*.22)*dt;}if(health<=0){finishGame('WRECKED');return;}
+ rain.position.x=player.position.x;rain.position.z=player.position.z;let a=rain.geometry.attributes.position;for(let i=0;i<rc;i++){a.array[i*3+1]-=dt*155;if(a.array[i*3+1]<0)a.array[i*3+1]=300;}a.needsUpdate=true;
+ lightTimer-=dt;if(lightTimer<=0){lightTimer=5+Math.random()*8;lightning.intensity=6;thunder();}lightning.intensity=Math.max(0,lightning.intensity-dt*7);
+ let target=player.position.clone().add(new THREE.Vector3(0,9,23).applyQuaternion(player.quaternion));camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.clone().add(forward.clone().multiplyScalar(18)));
+ if(performance.now()-lastToast>2200)$('toast').style.display='none';if(frame++%5===0)updHUD();}
+function loop(){requestAnimationFrame(loop);let dt=Math.min(clock.getDelta(),.04);update(dt);renderer.render(scene,camera);}mainMenu();loop();
+</script></body></html>
