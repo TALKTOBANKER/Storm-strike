@@ -1,4 +1,4 @@
-name: Build 11.aab version 11
+name: Build Signed APK v11 Test
 
 on:
   workflow_dispatch:
@@ -7,22 +7,45 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-      - name: Build AAB
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Tim file keystore
+        run: |
+          echo "Tim keystore trong repo:"
+          find . -name "*.jks" -type f
+          ls -la *.jks 2>/dev/null || true
+          ls -la app/*.jks 2>/dev/null || true
+
+      - name: Build APK Co Chu Ky
         env:
           STORE_PASSWORD: 123456
           KEY_PASSWORD: 123456
           KEY_ALIAS: key0
         run: |
           chmod +x gradlew
-          ./gradlew clean bundleRelease
-      - name: Doi ten thanh 5.aab
-        run: cp app/build/outputs/bundle/release/app-release.aab 5.aab
-      - uses: actions/upload-artifact@v4
+          # tim duong dan keystore tu dong
+          KS_FILE=$(find . -name "stormstrike.jks" | head -n 1)
+          echo "Dung keystore: $KS_FILE"
+          export KEYSTORE_PATH="$KS_FILE"
+          ./gradlew clean assembleRelease
+          echo "Build xong, kiem tra chu ky:"
+          ls -lh app/build/outputs/apk/release/
+
+      - name: Doi ten thanh APK v11
+        run: cp app/build/outputs/apk/release/app-release.apk Storm-Strike-v11-signed.apk
+
+      - name: Upload APK Signed
+        uses: actions/upload-artifact@v4
         with:
-          name: 5-aab-version-11
-          path: 5.aab
+          name: APK-v11-signed-co-chu-ky
+          path: Storm-Strike-v11-signed.apk
